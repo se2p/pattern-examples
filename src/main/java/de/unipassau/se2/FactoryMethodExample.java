@@ -3,11 +3,11 @@ package de.unipassau.se2;
 public class FactoryMethodExample {
 
     abstract class Creator {
-        abstract protected int factoryMethod();
+        protected abstract int factoryMethod();
 
         public void doOperation() {
             int x = factoryMethod();
-            System.out.println("The value is: "+x);
+            System.out.println("The value is "+x);
         }
     }
 
@@ -21,16 +21,15 @@ public class FactoryMethodExample {
     class ConcreteCreatorB extends Creator {
         @Override
         protected int factoryMethod() {
-            return 1;
+            return 42;
         }
     }
 
     public void demo() {
-        Creator ca = new ConcreteCreatorA();
-        ca.doOperation();
-
         Creator cb = new ConcreteCreatorB();
         cb.doOperation();
+
+
     }
 
     public static void main(String[] args) {

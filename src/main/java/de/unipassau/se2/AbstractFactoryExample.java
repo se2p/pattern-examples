@@ -9,14 +9,14 @@ public class AbstractFactoryExample {
     class ConcreteProductA1 implements AbstractProductA {
         @Override
         public String getValue() {
-            return "This is a concrete A product";
+            return "Concrete product A 1";
         }
     }
 
     class ConcreteProductA2 implements AbstractProductA {
         @Override
         public String getValue() {
-            return "This is the other concrete A product";
+            return "Concrete product A 2";
         }
     }
 
@@ -34,7 +34,7 @@ public class AbstractFactoryExample {
     class ConcreteProductB2 implements AbstractProductB {
         @Override
         public int getValue() {
-            return 100;
+            return 42;
         }
     }
 
@@ -67,20 +67,22 @@ public class AbstractFactoryExample {
         }
     }
 
-    public void printProducts(AbstractFactory factory) {
+    public void printProduct(AbstractFactory factory) {
         AbstractProductA a = factory.createA();
         AbstractProductB b = factory.createB();
-        System.out.println(a.getValue() +": "+b.getValue());
+        System.out.println(a.getValue() +" : "+b.getValue());
     }
 
     public void demo() {
-        ConcreteFactory1 factory1 = new ConcreteFactory1();
-        ConcreteFactory2 factory2 = new ConcreteFactory2();
-        printProducts(factory1);
-        printProducts(factory2);
+        AbstractFactory factory1 = new ConcreteFactory1();
+        AbstractFactory factory2 = new ConcreteFactory2();
+
+        printProduct(factory1);
+        printProduct(factory2);
     }
 
     public static void main(String[] args) {
         new AbstractFactoryExample().demo();
     }
+
 }

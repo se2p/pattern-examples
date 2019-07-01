@@ -4,77 +4,69 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ObserverExample {
-
     interface Observer {
         void update(Subject s);
     }
 
-    abstract class Subject {
-        private List<Observer> observers = new ArrayList<>();
+    interface Subject {
+        void attach(Observer o);
+        void detach(Observer o);
+        void notifyObservers();
+        String getName();
+    }
 
+    class ConcreteSubject implements Subject {
+        private List<Observer> observers = new ArrayList<>();
+        private String name;
+
+        public ConcreteSubject(String name) {
+            this.name = name;
+        }
+
+        @Override
         public void attach(Observer o) {
             observers.add(o);
         }
 
+        @Override
         public void detach(Observer o) {
             observers.remove(o);
         }
 
-        public void notifyChange() {
+        @Override
+        public void notifyObservers() {
             for(Observer o : observers) {
                 o.update(this);
             }
         }
-    }
 
-    class ConcreteSubjectA extends Subject {
-        @Override
-        public String toString() {
-            return "This is concrete subject A";
+        public void makeChange() {
+            // ...
+            notifyObservers();
         }
-        public void makeAChange() {
-            notifyChange();
-        }
-    }
 
-    class ConcreteSubjectB extends Subject {
-        @Override
-        public String toString() {
-            return "This is concrete subject B";
-        }
-        public void makeAChange() {
-            notifyChange();
+        public String getName() {
+            return name;
         }
     }
 
-    class ConcreteObserverA implements Observer {
+    class ConcreteObserver implements Observer {
         @Override
         public void update(Subject s) {
-            System.out.println("ObserverA has just been notified that there has been an update to "+s);
-        }
-    }
-
-    class ConcreteObserverB implements Observer {
-        @Override
-        public void update(Subject s) {
-            System.out.println("ObserverB has just been notified that there has been an update to "+s);
+            System.out.println("I have been notified by "+s.getName());
         }
     }
 
     public void demo() {
-        ConcreteObserverA oa = new ConcreteObserverA();
-        ConcreteObserverB ob = new ConcreteObserverB();
+        ConcreteObserver observer = new ConcreteObserver();
+        ConcreteSubject subject1 = new ConcreteSubject("Foo");
+        ConcreteSubject subject2 = new ConcreteSubject("Bar");
 
-        ConcreteSubjectA sa = new ConcreteSubjectA();
-        ConcreteSubjectB sb = new ConcreteSubjectB();
+        subject1.attach(observer);
+        subject2.attach(observer);
 
-        sa.attach(oa);
-        sa.attach(ob);
-        sb.attach(oa);
-        sb.attach(ob);
-
-        sa.makeAChange();
-        sb.makeAChange();
+        subject1.makeChange();
+        subject2.makeChange();
     }
 
     public static void main(String[] args) {

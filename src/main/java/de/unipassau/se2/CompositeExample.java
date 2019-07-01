@@ -5,34 +5,14 @@ import java.util.List;
 
 public class CompositeExample {
 
+
     interface Component {
-        void theOperation();
-    }
-
-    class Composite implements Component {
-        private List<Component> children = new ArrayList<>();
-
-        public void add(Component c) {
-            children.add(c);
-        }
-
-        public void remove(Component c) {
-            children.remove(c);
-        }
-
-        public Component getChild(int i) {
-            return children.get(i);
-        }
-
-        @Override
-        public void theOperation() {
-            for(Component c : children) {
-                c.theOperation();
-            }
-        }
+        void doOperation();
+        void add(Component c);
     }
 
     class Leaf implements Component {
+
         private String name;
 
         public Leaf(String name) {
@@ -40,35 +20,54 @@ public class CompositeExample {
         }
 
         @Override
-        public void theOperation() {
-            System.out.println("This is leaf component "+name);
+        public void doOperation() {
+            System.out.println(name);
+        }
+
+        @Override
+        public void add(Component c) {
+
+        }
+    }
+
+    class Composite implements Component {
+
+        private List<Component> children = new ArrayList<>();
+
+        @Override
+        public void doOperation() {
+            children.stream().forEach(Component::doOperation);
+        }
+
+        @Override
+        public void add(Component c) {
+            children.add(c);
         }
     }
 
     public void demo() {
-        Composite comp1 = new Composite();
-        Composite comp2 = new Composite();
-        Composite comp3 = new Composite();
+        Component leaf1 = new Leaf("Leaf 1");
+        Component leaf2 = new Leaf("Leaf 2");
+        Component leaf3 = new Leaf("Leaf 3");
+        Component leaf4 = new Leaf("Leaf 4");
 
-        Leaf leaf1 = new Leaf("Leaf 1");
-        Leaf leaf2 = new Leaf("Leaf 2");
-        Leaf leaf3 = new Leaf("Leaf 3");
-        Leaf leaf4 = new Leaf("Leaf 4");
+        Component comp1 = new Composite();
+        Component comp2 = new Composite();
+        Component comp3 = new Composite();
 
         comp1.add(comp2);
         comp1.add(comp3);
 
+        comp3.add(leaf3);
+        comp3.add(leaf4);
         comp2.add(leaf1);
         comp2.add(leaf2);
 
-        comp3.add(leaf3);
-        comp3.add(leaf4);
+        comp1.doOperation();
 
-        comp1.theOperation();
     }
 
     public static void main(String[] args) {
         new CompositeExample().demo();
     }
-
 }
