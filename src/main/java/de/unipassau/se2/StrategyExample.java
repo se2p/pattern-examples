@@ -1,97 +1,48 @@
 package de.unipassau.se2;
 
-import java.util.ArrayList;
-import java.util.List;
+import de.unipassau.se2.maze.Direction;
 
 public class StrategyExample {
 
-
-    interface Component {
-        void doOperation();
-        void add(Component c);
+    interface MovementStrategy {
+        Direction chooseDirection();
     }
 
-    interface Strategy {
-        String formatLeaf(String name);
-    }
+    class Guard {
+        private MovementStrategy strategy;
 
-    class ConcreteStrategy implements Strategy {
-        @Override
-        public String formatLeaf(String name) {
-            return "Operation performed on "+name;
+        Guard(MovementStrategy strategy) {
+            this.strategy = strategy;
         }
-    }
 
-    class PrettyPrintStrategy implements Strategy {
-        @Override
-        public String formatLeaf(String name) {
-            return "*** Lovely operation beautifully performed on "+name+" ***";
+        public void setStrategy(MovementStrategy strategy) {
+            this.strategy = strategy;
+        }
+
+        public void move() {
+            System.out.println("Guard moves " + strategy.chooseDirection());
         }
     }
 
-    class Leaf implements Component {
-
-        private String name;
-
-        private Strategy formatStrategy = new ConcreteStrategy();
-
-        public void setFormatStrategy(Strategy strategy) {
-            formatStrategy = strategy;
-        }
-
-        public Leaf(String name) {
-            this.name = name;
-        }
-
+    class PatrolStrategy implements MovementStrategy {
         @Override
-        public void doOperation() {
-            System.out.println(formatStrategy.formatLeaf(name));
-        }
-
-        @Override
-        public void add(Component c) {
-
+        public Direction chooseDirection() {
+            return Direction.EAST;
         }
     }
 
-    class Composite implements Component {
-
-        private List<Component> children = new ArrayList<>();
-
+    class ChasePlayerStrategy implements MovementStrategy {
         @Override
-        public void doOperation() {
-            children.stream().forEach(Component::doOperation);
-        }
-
-        @Override
-        public void add(Component c) {
-            children.add(c);
+        public Direction chooseDirection() {
+            return Direction.NORTH;
         }
     }
 
     public void demo() {
-        Leaf leaf1 = new Leaf("Leaf 1");
-        Leaf leaf2 = new Leaf("Leaf 2");
-        Leaf leaf3 = new Leaf("Leaf 3");
-        Leaf leaf4 = new Leaf("Leaf 4");
-
-        leaf3.setFormatStrategy(new PrettyPrintStrategy());
-
-
-        Component comp1 = new Composite();
-        Component comp2 = new Composite();
-        Component comp3 = new Composite();
-
-        comp1.add(comp2);
-        comp1.add(comp3);
-
-        comp3.add(leaf3);
-        comp3.add(leaf4);
-        comp2.add(leaf1);
-        comp2.add(leaf2);
-
-        comp1.doOperation();
-
+        Guard guard = new Guard(new PatrolStrategy());
+        guard.move();
+        guard.setStrategy(new ChasePlayerStrategy());
+        guard.move();
     }
 
     public static void main(String[] args) {

@@ -1,105 +1,71 @@
 package de.unipassau.se2;
 
-import java.util.ArrayList;
-import java.util.List;
+import de.unipassau.se2.maze.Player;
 
 public class DecoratorExample {
 
-
-
-    interface Component {
-        void doOperation();
-        void add(Component c);
+    interface EnterableRoom {
+        String enter(Player player);
     }
 
-    class Leaf implements Component {
+    class PlainRoom implements EnterableRoom {
+        private final String name;
 
-        private String name;
-
-        public Leaf(String name) {
+        PlainRoom(String name) {
             this.name = name;
         }
 
         @Override
-        public void doOperation() {
-            System.out.println(name);
-        }
-
-        @Override
-        public void add(Component c) {
-
+        public String enter(Player player) {
+            return "You enter " + name + ".";
         }
     }
 
-    class Composite implements Component {
+    abstract class RoomDecorator implements EnterableRoom {
+        private final EnterableRoom room;
 
-        private List<Component> children = new ArrayList<>();
-
-        @Override
-        public void doOperation() {
-            children.stream().forEach(Component::doOperation);
+        RoomDecorator(EnterableRoom room) {
+            this.room = room;
         }
 
         @Override
-        public void add(Component c) {
-            children.add(c);
+        public String enter(Player player) {
+            return room.enter(player);
         }
     }
 
-    abstract class Decorator implements Component {
-        private Component component;
-
-        public Decorator(Component c) {
-            component = c;
+    class TrapRoom extends RoomDecorator {
+        TrapRoom(EnterableRoom room) {
+            super(room);
         }
 
         @Override
-        public void doOperation() {
-            component.doOperation();
-        }
-
-        @Override
-        public void add(Component c) {
-            component.add(c);
+        public String enter(Player player) {
+            player.damage(2);
+            return super.enter(player) + " A trap hits you. Health: " + player.getHealth();
         }
     }
 
-    class ConcreteDecoratorA extends Decorator {
-        public ConcreteDecoratorA(Component c) {
-            super(c);
+    class TreasureRoom extends RoomDecorator {
+        TreasureRoom(EnterableRoom room) {
+            super(room);
         }
 
         @Override
-        public void doOperation() {
-            super.doOperation();
-            System.out.println("...Some extra functionality");
+        public String enter(Player player) {
+            player.addScore(10);
+            return super.enter(player) + " You find treasure. Score: " + player.getScore();
         }
     }
 
     public void demo() {
-        Component leaf1 = new ConcreteDecoratorA(new Leaf("Leaf 1"));
-        Component leaf2 = new ConcreteDecoratorA(new Leaf("Leaf 2"));
-        Component leaf3 = new Leaf("Leaf 3");
-        Component leaf4 = new Leaf("Leaf 4");
+        Player player = new Player(null);
+        EnterableRoom room = new TreasureRoom(new TrapRoom(new PlainRoom("Vault")));
 
-        Component comp1 = new Composite();
-        Component comp2 = new Composite();
-        Component comp3 = new Composite();
-
-        comp1.add(comp2);
-        comp1.add(comp3);
-
-        comp3.add(leaf3);
-        comp3.add(leaf4);
-        comp2.add(leaf1);
-        comp2.add(leaf2);
-
-        comp1.doOperation();
-
+        System.out.println(room.enter(player));
     }
 
     public static void main(String[] args) {
         new DecoratorExample().demo();
     }
-
 }

@@ -5,99 +5,77 @@ import java.util.List;
 
 public class VisitorExample {
 
-
-    interface Visitable {
-        void accept(Visitor v);
+    interface MazeElement {
+        void accept(MazeVisitor visitor);
     }
 
-    interface Component extends Visitable {
-        void doOperation();
-        void add(Component c);
-    }
+    class TreasureRoom implements MazeElement {
+        private final String name;
+        private final boolean hasTreasure;
 
-    class Leaf implements Component {
-
-        private String name;
-
-        public Leaf(String name) {
+        TreasureRoom(String name, boolean hasTreasure) {
             this.name = name;
+            this.hasTreasure = hasTreasure;
         }
 
         @Override
-        public void doOperation() {
-            System.out.println(name);
-        }
-
-        @Override
-        public void add(Component c) {
-
-        }
-
-        @Override
-        public void accept(Visitor v) {
-            v.visit(this);
+        public void accept(MazeVisitor visitor) {
+            visitor.visit(this);
         }
     }
 
-    class Composite implements Component {
+    class Maze implements MazeElement {
+        private final List<MazeElement> elements = new ArrayList<>();
 
-        private List<Component> children = new ArrayList<>();
-
-        @Override
-        public void doOperation() {
-            children.stream().forEach(Component::doOperation);
+        public void add(MazeElement element) {
+            elements.add(element);
         }
 
         @Override
-        public void add(Component c) {
-            children.add(c);
-        }
-
-        @Override
-        public void accept(Visitor v) {
-            v.visit(this);
-
+        public void accept(MazeVisitor visitor) {
+            visitor.visit(this);
+            for (MazeElement element : elements) {
+                element.accept(visitor);
+            }
         }
     }
 
-    interface Visitor {
-        void visit(Leaf l);
-        void visit(Composite c);
+    interface MazeVisitor {
+        void visit(Maze maze);
+
+        void visit(TreasureRoom room);
     }
 
-    class PrintVisitor implements Visitor {
+    class TreasureCountingVisitor implements MazeVisitor {
+        private int treasures;
+
         @Override
-        public void visit(Leaf l) {
-            System.out.println("Here's a leaf: "+l.name);
+        public void visit(Maze maze) {
+            System.out.println("Scanning maze...");
         }
 
         @Override
-        public void visit(Composite c) {
-            System.out.println("Here's a composite with "+c.children.size()+" children");
-            c.children.stream().forEach(child -> child.accept(this));
+        public void visit(TreasureRoom room) {
+            if (room.hasTreasure) {
+                treasures++;
+            }
+        }
+
+        public int getTreasures() {
+            return treasures;
         }
     }
 
     public void demo() {
-        Component leaf1 = new Leaf("Leaf 1");
-        Component leaf2 = new Leaf("Leaf 2");
-        Component leaf3 = new Leaf("Leaf 3");
-        Component leaf4 = new Leaf("Leaf 4");
+        Maze maze = new Maze();
+        maze.add(new TreasureRoom("Hall", false));
+        maze.add(new TreasureRoom("Vault", true));
+        maze.add(new TreasureRoom("Library", true));
 
-        Component comp1 = new Composite();
-        Component comp2 = new Composite();
-        Component comp3 = new Composite();
+        TreasureCountingVisitor visitor = new TreasureCountingVisitor();
+        maze.accept(visitor);
 
-        comp1.add(comp2);
-        comp1.add(comp3);
-
-        comp3.add(leaf3);
-        comp3.add(leaf4);
-        comp2.add(leaf1);
-        comp2.add(leaf2);
-
-        PrintVisitor visitor = new PrintVisitor();
-        comp1.accept(visitor);
+        System.out.println("Treasures: " + visitor.getTreasures());
     }
 
     public static void main(String[] args) {

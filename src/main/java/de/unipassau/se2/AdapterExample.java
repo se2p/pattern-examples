@@ -1,29 +1,35 @@
 package de.unipassau.se2;
 
+import de.unipassau.se2.maze.Direction;
+
 public class AdapterExample {
 
-    class Adaptee {
-        void someOldMethod() {
-            System.out.println("This is what we want to call");
+    class LegacyKeyboard {
+        String readKey() {
+            return "n";
         }
     }
 
-    interface Target {
-        void doSomethingNew();
+    interface DirectionInput {
+        Direction nextDirection();
     }
 
-    class Adapter implements Target {
-        private Adaptee adaptee = new Adaptee();
+    class KeyboardAdapter implements DirectionInput {
+        private final LegacyKeyboard keyboard;
+
+        KeyboardAdapter(LegacyKeyboard keyboard) {
+            this.keyboard = keyboard;
+        }
 
         @Override
-        public void doSomethingNew() {
-            adaptee.someOldMethod();
+        public Direction nextDirection() {
+            return Direction.fromInput(keyboard.readKey());
         }
     }
 
     public void demo() {
-        Adapter adapter = new Adapter();
-        adapter.doSomethingNew();
+        DirectionInput input = new KeyboardAdapter(new LegacyKeyboard());
+        System.out.println("Move " + input.nextDirection());
     }
 
     public static void main(String[] args) {

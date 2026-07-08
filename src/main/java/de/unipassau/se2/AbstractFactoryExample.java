@@ -2,87 +2,55 @@ package de.unipassau.se2;
 
 public class AbstractFactoryExample {
 
-    interface AbstractProductA {
-        String getValue();
+    interface ThemedRoom {
+        String describe();
     }
 
-    class ConcreteProductA1 implements AbstractProductA {
+    interface Door {
+        String describe();
+    }
+
+    interface MazeThemeFactory {
+        ThemedRoom createRoom();
+
+        Door createDoor();
+    }
+
+    class DungeonFactory implements MazeThemeFactory {
         @Override
-        public String getValue() {
-            return "Concrete product A 1";
-        }
-    }
-
-    class ConcreteProductA2 implements AbstractProductA {
-        @Override
-        public String getValue() {
-            return "Concrete product A 2";
-        }
-    }
-
-    interface AbstractProductB {
-        int getValue();
-    }
-
-    class ConcreteProductB1 implements AbstractProductB {
-        @Override
-        public int getValue() {
-            return 0;
-        }
-    }
-
-    class ConcreteProductB2 implements AbstractProductB {
-        @Override
-        public int getValue() {
-            return 42;
-        }
-    }
-
-    interface AbstractFactory {
-        AbstractProductA createA();
-        AbstractProductB createB();
-    }
-
-    class ConcreteFactory1 implements AbstractFactory {
-        @Override
-        public AbstractProductA createA() {
-            return new ConcreteProductA1();
+        public ThemedRoom createRoom() {
+            return () -> "a damp stone room";
         }
 
         @Override
-        public AbstractProductB createB() {
-            return new ConcreteProductB1();
+        public Door createDoor() {
+            return () -> "an iron door";
         }
     }
 
-    class ConcreteFactory2 implements AbstractFactory {
+    class MagicFactory implements MazeThemeFactory {
         @Override
-        public AbstractProductA createA() {
-            return new ConcreteProductA2();
+        public ThemedRoom createRoom() {
+            return () -> "a glowing crystal room";
         }
 
         @Override
-        public AbstractProductB createB() {
-            return new ConcreteProductB2();
+        public Door createDoor() {
+            return () -> "a shimmering portal";
         }
     }
 
-    public void printProduct(AbstractFactory factory) {
-        AbstractProductA a = factory.createA();
-        AbstractProductB b = factory.createB();
-        System.out.println(a.getValue() +" : "+b.getValue());
+    public void printMaze(MazeThemeFactory factory) {
+        System.out.println("This maze has " + factory.createRoom().describe()
+            + " behind " + factory.createDoor().describe() + ".");
     }
 
     public void demo() {
-        AbstractFactory factory1 = new ConcreteFactory1();
-        AbstractFactory factory2 = new ConcreteFactory2();
-
-        printProduct(factory1);
-        printProduct(factory2);
+        printMaze(new DungeonFactory());
+        printMaze(new MagicFactory());
     }
 
     public static void main(String[] args) {
         new AbstractFactoryExample().demo();
     }
-
 }

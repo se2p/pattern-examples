@@ -1,72 +1,56 @@
 package de.unipassau.se2;
 
+import de.unipassau.se2.maze.Direction;
+import de.unipassau.se2.maze.MazeGame;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ObserverExample {
-    interface Observer {
-        void update(Subject s);
+
+    interface GameObserver {
+        void update(String event);
     }
 
-    interface Subject {
-        void attach(Observer o);
-        void detach(Observer o);
-        void notifyObservers();
-        String getName();
-    }
+    class ObservableGame {
+        private final MazeGame game = MazeGame.demoGame();
+        private final List<GameObserver> observers = new ArrayList<>();
 
-    class ConcreteSubject implements Subject {
-        private List<Observer> observers = new ArrayList<>();
-        private String name;
-
-        public ConcreteSubject(String name) {
-            this.name = name;
+        public void attach(GameObserver observer) {
+            observers.add(observer);
         }
 
-        @Override
-        public void attach(Observer o) {
-            observers.add(o);
+        public void move(Direction direction) {
+            String result = game.move(direction);
+            notifyObservers(result);
         }
 
-        @Override
-        public void detach(Observer o) {
-            observers.remove(o);
-        }
-
-        @Override
-        public void notifyObservers() {
-            for(Observer o : observers) {
-                o.update(this);
+        private void notifyObservers(String event) {
+            for (GameObserver observer : observers) {
+                observer.update(event);
             }
         }
+    }
 
-        public void makeChange() {
-            // ...
-            notifyObservers();
-        }
-
-        public String getName() {
-            return name;
+    class GameLog implements GameObserver {
+        @Override
+        public void update(String event) {
+            System.out.println("Log: " + event);
         }
     }
 
-    class ConcreteObserver implements Observer {
+    class MiniMap implements GameObserver {
         @Override
-        public void update(Subject s) {
-            System.out.println("I have been notified by "+s.getName());
+        public void update(String event) {
+            System.out.println("MiniMap redraws after: " + event);
         }
     }
 
     public void demo() {
-        ConcreteObserver observer = new ConcreteObserver();
-        ConcreteSubject subject1 = new ConcreteSubject("Foo");
-        ConcreteSubject subject2 = new ConcreteSubject("Bar");
+        ObservableGame game = new ObservableGame();
+        game.attach(new GameLog());
+        game.attach(new MiniMap());
 
-        subject1.attach(observer);
-        subject2.attach(observer);
-
-        subject1.makeChange();
-        subject2.makeChange();
+        game.move(Direction.EAST);
     }
 
     public static void main(String[] args) {

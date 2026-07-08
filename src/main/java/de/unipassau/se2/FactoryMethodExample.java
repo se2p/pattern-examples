@@ -1,35 +1,38 @@
 package de.unipassau.se2;
 
+import de.unipassau.se2.maze.Room;
+
 public class FactoryMethodExample {
 
-    abstract class Creator {
-        protected abstract int factoryMethod();
+    abstract class MazeGame {
+        protected abstract Room createRoom(String name);
 
-        public void doOperation() {
-            int x = factoryMethod();
-            System.out.println("The value is "+x);
+        public void playIntro() {
+            Room entrance = createRoom("Entrance");
+            Room exit = createRoom("Exit");
+
+            System.out.println(entrance.look());
+            System.out.println(exit.look());
         }
     }
 
-    class ConcreteCreatorA extends Creator {
+    class DungeonGame extends MazeGame {
         @Override
-        protected int factoryMethod() {
-            return 0;
+        protected Room createRoom(String name) {
+            return new Room(name, "Stone walls and cold air.");
         }
     }
 
-    class ConcreteCreatorB extends Creator {
+    class GardenGame extends MazeGame {
         @Override
-        protected int factoryMethod() {
-            return 42;
+        protected Room createRoom(String name) {
+            return new Room(name, "Moss, vines, and birdsong.");
         }
     }
 
     public void demo() {
-        Creator cb = new ConcreteCreatorB();
-        cb.doOperation();
-
-
+        MazeGame game = new DungeonGame();
+        game.playIntro();
     }
 
     public static void main(String[] args) {

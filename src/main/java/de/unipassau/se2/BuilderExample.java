@@ -1,53 +1,60 @@
 package de.unipassau.se2;
 
-import java.util.ArrayList;
-import java.util.List;
+import de.unipassau.se2.maze.Direction;
+import de.unipassau.se2.maze.Maze;
+import de.unipassau.se2.maze.MazeGame;
+import de.unipassau.se2.maze.Room;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BuilderExample {
 
-    interface Builder {
-        Builder addNumber(int x);
-        List<Integer> getProduct();
-    }
+    class MazeBuilder {
+        private final Maze maze = new Maze();
+        private final Map<String, Room> rooms = new HashMap<>();
 
-    class ConcreteBuilder implements Builder {
-        private List<Integer> theList = new ArrayList<>();
-
-        @Override
-        public Builder addNumber(int x) {
-            theList.add(x);
+        public MazeBuilder room(String name, String description) {
+            Room room = new Room(name, description);
+            rooms.put(name, room);
+            maze.add(room);
             return this;
         }
 
-        @Override
-        public List<Integer> getProduct() {
-            return theList;
-        }
-    }
-
-    class SquaredConcreteBuilder implements Builder {
-        private List<Integer> theList = new ArrayList<>();
-
-        @Override
-        public Builder addNumber(int x) {
-            theList.add(x * x);
+        public MazeBuilder connect(String from, Direction direction, String to) {
+            Room first = rooms.get(from);
+            Room second = rooms.get(to);
+            first.connect(direction, second);
+            second.connect(direction.opposite(), first);
             return this;
         }
 
-        @Override
-        public List<Integer> getProduct() {
-            return theList;
+        public MazeBuilder exit(String name) {
+            maze.setExitRoom(rooms.get(name));
+            return this;
+        }
+
+        public Maze build() {
+            return maze;
         }
     }
 
     public void demo() {
-        Builder builder = new SquaredConcreteBuilder();
-        builder.addNumber(0).addNumber(42).addNumber(100);
-        System.out.println(builder.getProduct());
+        Maze maze = new MazeBuilder()
+            .room("Hall", "A quiet entrance hall.")
+            .room("Armory", "Old swords hang on the wall.")
+            .room("Exit", "Fresh air is close.")
+            .connect("Hall", Direction.EAST, "Armory")
+            .connect("Armory", Direction.SOUTH, "Exit")
+            .exit("Exit")
+            .build();
+
+        MazeGame game = new MazeGame(maze);
+        System.out.println(game.look());
+        System.out.println(game.move(Direction.EAST));
+        System.out.println(game.move(Direction.SOUTH));
     }
 
     public static void main(String[] args) {
         new BuilderExample().demo();
     }
-
 }

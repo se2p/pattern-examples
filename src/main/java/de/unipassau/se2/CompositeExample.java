@@ -5,66 +5,64 @@ import java.util.List;
 
 public class CompositeExample {
 
+    interface MazeElement {
+        String render();
 
-    interface Component {
-        void doOperation();
-        void add(Component c);
+        default void add(MazeElement element) {
+            throw new UnsupportedOperationException("Only maze sections can contain children");
+        }
     }
 
-    class Leaf implements Component {
+    class RoomElement implements MazeElement {
+        private final String name;
 
-        private String name;
-
-        public Leaf(String name) {
+        RoomElement(String name) {
             this.name = name;
         }
 
         @Override
-        public void doOperation() {
-            System.out.println(name);
-        }
-
-        @Override
-        public void add(Component c) {
-
+        public String render() {
+            return "- room: " + name + "\n";
         }
     }
 
-    class Composite implements Component {
+    class MazeSection implements MazeElement {
+        private final String name;
+        private final List<MazeElement> children = new ArrayList<>();
 
-        private List<Component> children = new ArrayList<>();
-
-        @Override
-        public void doOperation() {
-            children.stream().forEach(Component::doOperation);
+        MazeSection(String name) {
+            this.name = name;
         }
 
         @Override
-        public void add(Component c) {
-            children.add(c);
+        public void add(MazeElement element) {
+            children.add(element);
+        }
+
+        @Override
+        public String render() {
+            StringBuilder builder = new StringBuilder("+ section: " + name + "\n");
+            for (MazeElement child : children) {
+                builder.append(child.render());
+            }
+            return builder.toString();
         }
     }
 
     public void demo() {
-        Component leaf1 = new Leaf("Leaf 1");
-        Component leaf2 = new Leaf("Leaf 2");
-        Component leaf3 = new Leaf("Leaf 3");
-        Component leaf4 = new Leaf("Leaf 4");
+        MazeElement maze = new MazeSection("Dungeon");
+        MazeElement westWing = new MazeSection("West wing");
+        MazeElement eastWing = new MazeSection("East wing");
 
-        Component comp1 = new Composite();
-        Component comp2 = new Composite();
-        Component comp3 = new Composite();
+        westWing.add(new RoomElement("Hall"));
+        westWing.add(new RoomElement("Armory"));
+        eastWing.add(new RoomElement("Library"));
+        eastWing.add(new RoomElement("Exit"));
 
-        comp1.add(comp2);
-        comp1.add(comp3);
+        maze.add(westWing);
+        maze.add(eastWing);
 
-        comp3.add(leaf3);
-        comp3.add(leaf4);
-        comp2.add(leaf1);
-        comp2.add(leaf2);
-
-        comp1.doOperation();
-
+        System.out.println(maze.render());
     }
 
     public static void main(String[] args) {
